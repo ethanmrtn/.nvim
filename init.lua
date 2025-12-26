@@ -90,6 +90,10 @@ P.S. You can delete this when you're done too. It's your config now! :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+-- Allow directory specific configs
+vim.opt.exrc = true
+vim.opt.secure = true
+
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
@@ -670,7 +674,32 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
+        clangd = {
+          cmd = {
+            'clangd',
+            '--background-index',
+            '--completion-style=detailed',
+            '--header-insertion=never', -- stops clangd auto-adding includes
+            '--all-scopes-completion',
+            '--cross-file-rename',
+            '--pch-storage=memory',
+            '--fallback-style=LLVM',
+            '--log=error',
+
+            -- Helpful in WSL / gcc toolchains (lets clangd query GCC for system includes)
+            '--query-driver=/usr/bin/**,/usr/local/bin/**',
+
+            -- Optional (enable if you want clang-tidy diagnostics)
+            -- "--clang-tidy",
+            -- "--clang-tidy-checks=performance-*,bugprone-*,modernize-*,readability-*,clang-analyzer-*",
+          },
+
+          init_options = {
+            usePlaceholders = true,
+            completeUnimported = true,
+            clangdFileStatus = true,
+          },
+        },
         -- gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
@@ -751,7 +780,7 @@ require('lazy').setup({
       {
         '<leader>f',
         function()
-          require('conform').format { async = true, lsp_format = 'fallback' }
+          require('conform').format { async = true, lsp_fallback = false }
         end,
         mode = '',
         desc = '[F]ormat buffer',
@@ -763,18 +792,20 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
+        local disable_filetypes = {}
         if disable_filetypes[vim.bo[bufnr].filetype] then
           return nil
         else
           return {
             timeout_ms = 500,
-            lsp_format = 'fallback',
+            lsp_fallback = false,
           }
         end
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        c = { 'clang-format' },
+        cpp = { 'clang-format' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --

@@ -287,6 +287,18 @@ require('lazy').setup({
     },
   },
 
+  -- Toggle Term because exiting the default neovim terminal is really really annoying
+  {
+    'akinsho/toggleterm.nvim',
+    version = '*',
+    opts = function()
+      require('toggleterm').setup {
+        direction = 'float',
+        open_mapping = [[<c-\>]],
+        auto_scroll = true,
+      }
+    end,
+  },
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
   --
   -- This is often very useful to both group configuration, as well as handle

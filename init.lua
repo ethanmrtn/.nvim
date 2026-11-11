@@ -147,6 +147,12 @@ do
   vim.o.splitright = true
   vim.o.splitbelow = true
 
+  -- Use four-space tabs and indentation by default.
+  vim.o.tabstop = 4
+  vim.o.shiftwidth = 4
+  vim.o.softtabstop = 4
+  vim.o.expandtab = true
+
   -- Sets how neovim will display certain whitespace characters in the editor.
   --  See `:help 'list'`
   --  and `:help 'listchars'`
@@ -342,9 +348,9 @@ do
   -- automatically detecting and setting the indentation.
   --
   -- We first install it from https://github.com/NMAC427/guess-indent.nvim
-  -- and then call its `setup()` function to start it with default settings.
+  -- Keep automatic detection disabled to preserve our four-space defaults.
   vim.pack.add { gh 'NMAC427/guess-indent.nvim' }
-  require('guess-indent').setup {}
+  require('guess-indent').setup { auto_cmd = false }
 
   -- Here is a more advanced configuration example that passes options to `gitsigns.nvim`
   --
@@ -804,6 +810,7 @@ do
   local ensure_installed = vim.tbl_keys(servers or {})
   vim.list_extend(ensure_installed, {
     -- You can add other tools here that you want Mason to install
+    'prettier', -- CSS formatting
   })
 
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -843,7 +850,9 @@ do
       -- rust = { 'rustfmt' },
       -- Conform can also run multiple formatters sequentially
       -- python = { "isort", "black" },
-      --
+      css = { 'prettier' },
+      cs = { lsp_format = 'prefer' }, -- Use the Roslyn language server for C#.
+      razor = { lsp_format = 'prefer', name = 'roslyn' }, -- Use Roslyn's Razor support rather than the HTML server.
       -- You can use 'stop_after_first' to run the first available formatter from the list
       -- javascript = { "prettierd", "prettier", stop_after_first = true },
     },
